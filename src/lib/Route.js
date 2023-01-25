@@ -298,14 +298,16 @@ class Router {
         if (index === prevIndex)
           throw new Error("next() called multiple times");
         prevIndex = index;
-        if (typeof handlers[index] === "function")
+        if (typeof handlers[index] === "function") {
           await handlers[index]({
             env,
             req,
             res,
             next: async () => await runner(index + 1),
           });
+        }
       };
+
       await runner(0);
       if (typeof res.body === "object") {
         if (!res.headers.has("Content-Type"))
@@ -313,6 +315,7 @@ class Router {
         res.body = JSON.stringify(res.body);
       }
       if (res.raw) return res.raw;
+      console.log(res);
       return new Response(
         [101, 204, 205, 304].includes(res.status || (res.body ? 200 : 204))
           ? null
