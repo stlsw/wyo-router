@@ -1,0 +1,12 @@
+{
+  "stack_id": "wyo-86c0b6",
+  "site_id": "888d44e0-6733-4d4a-9a29-bf29ecd73ff6",
+  "scripts": [
+    {
+      "name": "router",
+      "paths": ["api/*"],
+      "file": "dist/index.js",
+      "id": "cfdd0b34-4d20-4686-8e8b-8dee71ab7483"
+    }
+  ]
+}
