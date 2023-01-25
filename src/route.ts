@@ -1,7 +1,7 @@
 import { Router } from "./lib/Route";
 
 const SMS_API_HOST = "https://message-dev.wyocrm.com/";
-const WHATSAPP_API_HOST = "http://whatsapp-dev.wyocrm.com/";
+const WHATSAPP_API_HOST = "https://whatsapp-dev.wyocrm.com/";
 
 const router = new Router();
 router.debug();
@@ -67,18 +67,27 @@ router.post("/api/v1/accounts/:accountGuid/chat/", async ({ req, res }) => {
     res.status = response.status;
   } else if (channel === "whatsapp") {
     response = await sendWhatsapp(req.params.accountGuid, body, headers);
+    const content = await response.json();
+    console.log(response, content);
     res.status = response.status;
+    res.body = content;
   } else if (channel === "hybrid") {
     response = await sendWhatsapp(req.params.accountGuid, body, headers);
-    if (response) {
-      response = await sendSMS(
-        req.params.accountGuid,
-        JSON.stringify({
-          to: req.body.receiver,
-          message: req.body.message,
-        }),
-        headers
-      );
+    if (response.status === 200) {
+      const content = (await response.json()) as {
+        error: string;
+        [key: string]: any;
+      };
+      if (content.error !== "") {
+        response = await sendSMS(
+          req.params.accountGuid,
+          JSON.stringify({
+            to: req.body.receiver,
+            message: req.body.message,
+          }),
+          headers
+        );
+      }
     }
 
     res.status = response.status;
@@ -86,9 +95,6 @@ router.post("/api/v1/accounts/:accountGuid/chat/", async ({ req, res }) => {
     res.body = { error: "Channel cannot be empty." };
     res.status = 500;
   }
-
-  // res.status = 204;
-  // res.body = "send successful";
 });
 
 addEventListener("fetch", (event) => {
